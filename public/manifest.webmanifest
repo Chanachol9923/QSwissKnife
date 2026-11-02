@@ -1,6 +1,6 @@
 {
-  "name": "QSwiftKnife",
-  "short_name": "QSwiftKnife",
+  "name": "QSwissKnife",
+  "short_name": "QSwissKnife",
   "description": "Convert, compress, crop and trim images, video, audio and PDFs — on your device.",
   "start_url": "./",
   "scope": "./",

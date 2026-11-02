@@ -41,7 +41,7 @@ function sortKeys(v: unknown): unknown {
 }
 
 export function JsonFormatter() {
-  const [input, setInput] = usePersistent('sk-json', '{"name":"QSwiftKnife","tools":30,"offline":true,"tags":["image","video","pdf"]}');
+  const [input, setInput] = usePersistent('sk-json', '{"name":"QSwissKnife","tools":30,"offline":true,"tags":["image","video","pdf"]}');
   const [indent, setIndent] = useState<'2' | '4' | 'tab' | 'min'>('2');
   const [sort, setSort] = useState(false);
 
@@ -227,7 +227,7 @@ const b64decode = (s: string) => {
 
 export function Base64Tool() {
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
-  const [input, setInput] = useState('Hello, QSwiftKnife! สวัสดี 👋');
+  const [input, setInput] = useState('Hello, QSwissKnife! สวัสดี 👋');
   const [urlSafe, setUrlSafe] = useState(false);
   const { out, error } = useMemo(() => {
     try {
@@ -267,7 +267,7 @@ export function Base64Tool() {
 
 /* ---------- URL ---------- */
 export function UrlTool() {
-  const [input, setInput] = useState('https://example.com/search?q=swift knife&lang=th&tags=a,b#top');
+  const [input, setInput] = useState('https://example.com/search?q=swiss knife&lang=th&tags=a,b#top');
   const [mode, setMode] = useState<'component' | 'uri'>('component');
   const enc = useMemo(() => (mode === 'component' ? encodeURIComponent(input) : encodeURI(input)), [input, mode]);
   const dec = useMemo(() => {

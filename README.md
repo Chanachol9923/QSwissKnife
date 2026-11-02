@@ -1,4 +1,4 @@
-# QSwiftKnife
+# QSwissKnife
 
 A pocket knife for files: convert, compress, crop and trim images, video, audio and PDFs, plus everyday developer and text tools. Everything runs in the browser — files never leave your device. The only exception is the YouTube Downloader, which uses a local helper on your own machine.
 
@@ -11,13 +11,13 @@ npm run build      # static build in dist/
 ## Desktop shortcut (Windows)
 
 ```bash
-npm run app:build  # builds launcher/bin/QSwiftKnife.exe and the Desktop + Start Menu shortcuts
+npm run app:build  # builds launcher/bin/QSwissKnife.exe and the Desktop + Start Menu shortcuts
 npm run shortcut   # only (re)create the shortcuts
 ```
 
-`QSwiftKnife.exe` is a small native window that shows the app with WebView2 (the Edge engine built into Windows), so it has its own taskbar button and icon — pin it like any program (right-click the shortcut → **Pin to taskbar**). It needs nothing beyond Windows 10/11: the build uses the built-in .NET Framework compiler and fetches Microsoft's WebView2 SDK DLLs once from nuget.org (signature-checked). Without the exe, the shortcut falls back to an Edge app window, which Windows groups under Edge.
+`QSwissKnife.exe` is a small native window that shows the app with WebView2 (the Edge engine built into Windows), so it has its own taskbar button and icon — pin it like any program (right-click the shortcut → **Pin to taskbar**). It needs nothing beyond Windows 10/11: the build uses the built-in .NET Framework compiler and fetches Microsoft's WebView2 SDK DLLs once from nuget.org (signature-checked). Without the exe, the shortcut falls back to an Edge app window, which Windows groups under Edge.
 
-Opening it starts a hidden local server on `http://127.0.0.1:4317` (rebuilding first if the code changed since the last build) and loads QSwiftKnife. A second launch just focuses the open window, and the window remembers its size and position. The server keeps running in the background so the next launch is instant; use **Stop QSwiftKnife server** in the Start Menu to shut it down. Logs: `launcher/server.log*`. Regenerate the icon with `npm run icons`.
+Opening it starts a hidden local server on `http://127.0.0.1:4317` (rebuilding first if the code changed since the last build) and loads QSwissKnife. A second launch just focuses the open window, and the window remembers its size and position. The server keeps running in the background so the next launch is instant; use **Stop QSwissKnife server** in the Start Menu to shut it down. Logs: `launcher/server.log*`. Regenerate the icon with `npm run icons`.
 
 ## YouTube Downloader (local helper)
 

@@ -323,7 +323,7 @@ async function createJob(body: unknown): Promise<Job> {
     gifFps: num(b.gifFps),
     gifWidth: num(b.gifWidth),
   };
-  const job: Job = { id: randomUUID(), req, status: 'downloading', progress: null, detail: 'Starting…', bytes: 0, dir: await mkdtemp(join(tmpdir(), 'qswiftknife-yt-')), created: Date.now() };
+  const job: Job = { id: randomUUID(), req, status: 'downloading', progress: null, detail: 'Starting…', bytes: 0, dir: await mkdtemp(join(tmpdir(), 'qswissknife-yt-')), created: Date.now() };
   jobs.set(job.id, job);
   runJob(job).catch((e: Error) => {
     if (job.status === 'canceled') return;
@@ -391,7 +391,7 @@ export function ytHelper(): Plugin {
     });
   };
   return {
-    name: 'qswiftknife-yt-helper',
+    name: 'qswissknife-yt-helper',
     configureServer: (server) => mount(server),
     configurePreviewServer: (server) => mount(server),
   };

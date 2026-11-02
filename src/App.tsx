@@ -118,7 +118,7 @@ export default function App() {
 
   // window title (also visible on the taskbar) shows how much is still running
   useEffect(() => {
-    const base = tool ? `${tool.name} · QSwiftKnife` : route === 'tasks' ? 'Running tasks · QSwiftKnife' : 'QSwiftKnife';
+    const base = tool ? `${tool.name} · QSwissKnife` : route === 'tasks' ? 'Running tasks · QSwissKnife' : 'QSwissKnife';
     document.title = totals.active ? `(${totals.active}) ${base}` : base;
   }, [tool, route, totals.active]);
 
@@ -165,7 +165,7 @@ export default function App() {
               <KnifeMark />
             </span>
             <span>
-              QSwiftKnife
+              QSwissKnife
               <small>{TOOLS.length} tools · offline-first</small>
             </span>
           </a>

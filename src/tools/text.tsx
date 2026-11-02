@@ -247,7 +247,7 @@ const CASES: { label: string; fn: (s: string) => string }[] = [
 ];
 
 export function TextCaseTool() {
-  const [text, setText] = useState('The quick brown fox jumps over the lazy dog.\nQSwiftKnife makes everyday file chores fast.');
+  const [text, setText] = useState('The quick brown fox jumps over the lazy dog.\nQSwissKnife makes everyday file chores fast.');
   const stats = useMemo(() => {
     const seg = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(undefined, { granularity: 'word' }) : null;
     const words = seg ? [...seg.segment(text)].filter((s) => s.isWordLike).length : text.split(/\s+/).filter(Boolean).length;

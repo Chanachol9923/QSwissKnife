@@ -1,4 +1,4 @@
-# Builds launcher\bin\QSwiftKnife.exe (WebView2 window) and refreshes the shortcuts.
+# Builds launcher\bin\QSwissKnife.exe (WebView2 window) and refreshes the shortcuts.
 #   npm run app:build
 # Needs only what ships with Windows 10/11: .NET Framework 4.8 (csc.exe) and the WebView2 runtime.
 # The WebView2 SDK DLLs are fetched once from Microsoft's official NuGet package and signature-checked.
@@ -48,7 +48,7 @@ if (-not (Test-Path $core)) {
 # 2. Compile
 New-Item -ItemType Directory -Force $Bin | Out-Null
 # the exe and its DLLs are locked while running
-$running = Get-Process QSwiftKnife -ErrorAction SilentlyContinue
+$running = Get-Process QSwissKnife -ErrorAction SilentlyContinue
 if ($running) { $running | Stop-Process -Force; $running | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 500 }
 foreach ($dll in Get-ChildItem $Sdk -Filter *.dll) {
   $dest = Join-Path $Bin $dll.Name
@@ -56,14 +56,14 @@ foreach ($dll in Get-ChildItem $Sdk -Filter *.dll) {
 }
 $fw = Split-Path $csc
 & $csc /nologo /target:winexe /platform:x64 /optimize+ `
-  "/out:$(Join-Path $Bin 'QSwiftKnife.exe')" `
-  "/win32icon:$(Join-Path $Here 'qswiftknife.ico')" `
+  "/out:$(Join-Path $Bin 'QSwissKnife.exe')" `
+  "/win32icon:$(Join-Path $Here 'qswissknife.ico')" `
   "/reference:$(Join-Path $Bin 'Microsoft.Web.WebView2.Core.dll')" `
   "/reference:$(Join-Path $Bin 'Microsoft.Web.WebView2.WinForms.dll')" `
   "/reference:$fw\System.Windows.Forms.dll" "/reference:$fw\System.Drawing.dll" `
-  (Join-Path $Here 'QSwiftKnife.cs')
-if ($LASTEXITCODE -ne 0) { throw 'Compiling QSwiftKnife.exe failed.' }
-Write-Host "Built $(Join-Path $Bin 'QSwiftKnife.exe')"
+  (Join-Path $Here 'QSwissKnife.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Compiling QSwissKnife.exe failed.' }
+Write-Host "Built $(Join-Path $Bin 'QSwissKnife.exe')"
 
 # 3. Shortcuts now point at the exe
 & (Join-Path $Here 'install.ps1')

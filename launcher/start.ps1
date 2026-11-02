@@ -1,6 +1,6 @@
-# Opens QSwiftKnife in its own app window, starting the local server first if needed.
+# Opens QSwissKnife in its own app window, starting the local server first if needed.
 #   -Stop         shut the background server down instead
-#   -ServerOnly   just make sure the server is running (used by QSwiftKnife.exe)
+#   -ServerOnly   just make sure the server is running (used by QSwissKnife.exe)
 #   -ErrorFile    with -ServerOnly: write the failure message here instead of showing a dialog
 param([switch]$Stop, [switch]$ServerOnly, [string]$ErrorFile)
 
@@ -12,7 +12,7 @@ $Log = Join-Path $PSScriptRoot 'server.log'
 
 function Show-Error([string]$Message) {
   Add-Type -AssemblyName PresentationFramework
-  [System.Windows.MessageBox]::Show($Message, 'QSwiftKnife', 'OK', 'Error') | Out-Null
+  [System.Windows.MessageBox]::Show($Message, 'QSwissKnife', 'OK', 'Error') | Out-Null
 }
 
 function Get-ServerPid {
@@ -45,10 +45,10 @@ try {
     if (-not (Test-Path $dist) -or (Get-Item $dist).LastWriteTimeUtc -lt $newest) {
       $build = Start-Process -FilePath $node -ArgumentList "`"$vite`"", 'build' -WorkingDirectory $Root -WindowStyle Hidden -Wait -PassThru `
         -RedirectStandardOutput "$Log.build" -RedirectStandardError "$Log.build.err"
-      if ($build.ExitCode -ne 0) { throw "Building QSwiftKnife failed. See $Log.build.err" }
+      if ($build.ExitCode -ne 0) { throw "Building QSwissKnife failed. See $Log.build.err" }
     }
 
-    # Port taken by something that isn't QSwiftKnife?
+    # Port taken by something that isn't QSwissKnife?
     if (Get-ServerPid) { throw "Port $Port is already in use by another program." }
 
     Start-Process -FilePath $node -ArgumentList "`"$vite`"", 'preview', '--port', $Port, '--strictPort', '--host', '127.0.0.1' `
@@ -56,14 +56,14 @@ try {
 
     $deadline = (Get-Date).AddSeconds(30)
     while (-not (Test-Server)) {
-      if ((Get-Date) -gt $deadline) { throw "The QSwiftKnife server didn't start. See $Log.err" }
+      if ((Get-Date) -gt $deadline) { throw "The QSwissKnife server didn't start. See $Log.err" }
       Start-Sleep -Milliseconds 300
     }
   }
 
   if ($ServerOnly) { exit 0 }
 
-  # Fallback when QSwiftKnife.exe isn't built: an app-style browser window (no tabs or address bar).
+  # Fallback when QSwissKnife.exe isn't built: an app-style browser window (no tabs or address bar).
   $browsers = @(
     "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
     "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",

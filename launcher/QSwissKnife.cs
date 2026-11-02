@@ -1,4 +1,4 @@
-// QSwiftKnife.exe — a small native window that hosts the app in WebView2 (the Edge engine built
+// QSwissKnife.exe — a small native window that hosts the app in WebView2 (the Edge engine built
 // into Windows). Because the window belongs to this exe rather than to Edge, Windows gives it its own
 // taskbar button and icon, and pinning it works like any other program.
 //
@@ -15,7 +15,7 @@ using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace QSwiftKnife
+namespace QSwissKnife
 {
     static class Program
     {
@@ -31,7 +31,7 @@ namespace QSwiftKnife
         static void Main()
         {
             bool first;
-            using (var mutex = new Mutex(true, "QSwiftKnife.SingleInstance", out first))
+            using (var mutex = new Mutex(true, "QSwissKnife.SingleInstance", out first))
             {
                 if (!first) { FocusExisting(); return; }
                 try { if (!SetProcessDpiAwarenessContext(new IntPtr(-4))) SetProcessDPIAware(); } // per-monitor v2
@@ -54,14 +54,14 @@ namespace QSwiftKnife
             }
         }
 
-        /// <summary>launcher\bin\QSwiftKnife.exe → project root</summary>
+        /// <summary>launcher\bin\QSwissKnife.exe → project root</summary>
         public static string Root { get { return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "..", "..")); } }
         public static string Launcher { get { return Path.Combine(Root, "launcher"); } }
         public static string DataDir
         {
             get
             {
-                var d = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSwiftKnife");
+                var d = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSwissKnife");
                 Directory.CreateDirectory(d);
                 return d;
             }
@@ -76,10 +76,10 @@ namespace QSwiftKnife
 
         public MainForm()
         {
-            Text = "QSwiftKnife";
+            Text = "QSwissKnife";
             BackColor = Bg;
             StartPosition = FormStartPosition.Manual;
-            var ico = Path.Combine(Program.Launcher, "qswiftknife.ico");
+            var ico = Path.Combine(Program.Launcher, "qswissknife.ico");
             Icon = File.Exists(ico) ? new Icon(ico) : Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             RestorePlacement();
             web.Dock = DockStyle.Fill;
@@ -98,7 +98,7 @@ namespace QSwiftKnife
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Couldn't start the WebView2 engine:\n" + ex.Message + "\n\nInstall the Microsoft Edge WebView2 Runtime and try again.", "QSwiftKnife", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Couldn't start the WebView2 engine:\n" + ex.Message + "\n\nInstall the Microsoft Edge WebView2 Runtime and try again.", "QSwissKnife", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
                 return;
             }
@@ -109,7 +109,7 @@ namespace QSwiftKnife
             core.DocumentTitleChanged += (s, e) =>
             {
                 var t = core.DocumentTitle;
-                Text = string.IsNullOrEmpty(t) || t.StartsWith("about:") || t.StartsWith("data:") ? "QSwiftKnife" : t;
+                Text = string.IsNullOrEmpty(t) || t.StartsWith("about:") || t.StartsWith("data:") ? "QSwissKnife" : t;
             };
             // links that open a new tab (e.g. "Open on YouTube") go to the normal browser
             core.NewWindowRequested += (s, e) => { e.Handled = true; OpenExternal(e.Uri); };
@@ -122,11 +122,11 @@ namespace QSwiftKnife
 
             if (!ServerUp())
             {
-                core.NavigateToString(Splash("Starting QSwiftKnife…", "Building and starting the local server. This takes a few seconds the first time.", false));
+                core.NavigateToString(Splash("Starting QSwissKnife…", "Building and starting the local server. This takes a few seconds the first time.", false));
                 var error = await Task.Run(() => StartServer());
                 if (error != null)
                 {
-                    core.NavigateToString(Splash("QSwiftKnife couldn't start", error, true));
+                    core.NavigateToString(Splash("QSwissKnife couldn't start", error, true));
                     return;
                 }
             }
@@ -176,7 +176,7 @@ namespace QSwiftKnife
         static string Splash(string title, string detail, bool error)
         {
             var enc = new Func<string, string>(t => WebUtility.HtmlEncode(t).Replace("\n", "<br>"));
-            return "<!doctype html><html><head><meta charset='utf-8'><title>QSwiftKnife</title><style>" +
+            return "<!doctype html><html><head><meta charset='utf-8'><title>QSwissKnife</title><style>" +
                 "body{margin:0;height:100vh;display:grid;place-items:center;background:#0a0c10;color:#e8eaf0;font:15px 'Segoe UI',system-ui,sans-serif}" +
                 ".b{text-align:center;max-width:520px;padding:24px}.s{width:34px;height:34px;margin:0 auto 18px;border-radius:50%;border:3px solid #2a2f3b;border-top-color:#8b74ff;animation:r .9s linear infinite}" +
                 "@keyframes r{to{transform:rotate(360deg)}}h1{font-size:18px;margin:0 0 8px}p{color:#8b93a7;margin:0;line-height:1.5}" +

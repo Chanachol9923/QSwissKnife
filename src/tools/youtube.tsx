@@ -219,7 +219,7 @@ export function YouTubeDownloader() {
         </p>
         {health === 'missing' ? (
           <Alert kind="warn">
-            The helper isn’t running. It starts automatically with <code className="mono">npm run dev</code> (or <code className="mono">npm run preview</code>) in the QSwiftKnife folder —
+            The helper isn’t running. It starts automatically with <code className="mono">npm run dev</code> (or <code className="mono">npm run preview</code>) in the QSwissKnife folder —
             a static build hosted elsewhere doesn’t include it.
           </Alert>
         ) : (

@@ -1,8 +1,8 @@
-"""Draw the QSwiftKnife app icon and export every size the app and Windows need.
+"""Draw the QSwissKnife app icon and export every size the app and Windows need.
 
     python launcher/make-icons.py
 
-Outputs: launcher/qswiftknife.ico (16–256 px), public/icon-192.png, public/icon-512.png,
+Outputs: launcher/qswissknife.ico (16–256 px), public/icon-192.png, public/icon-512.png,
 public/apple-touch-icon.png, public/favicon-32.png
 """
 import math
@@ -98,7 +98,7 @@ def main():
     icon = build()
     big = icon.resize((1024, 1024), Image.LANCZOS)
     sizes = [16, 20, 24, 32, 40, 48, 64, 128, 256]
-    big.resize((256, 256), Image.LANCZOS).save(ROOT / 'launcher' / 'qswiftknife.ico', sizes=[(s, s) for s in sizes])
+    big.resize((256, 256), Image.LANCZOS).save(ROOT / 'launcher' / 'qswissknife.ico', sizes=[(s, s) for s in sizes])
     for name, s in [('icon-512.png', 512), ('icon-192.png', 192), ('apple-touch-icon.png', 180), ('favicon-32.png', 32)]:
         big.resize((s, s), Image.LANCZOS).save(ROOT / 'public' / name, optimize=True)
     big.resize((256, 256), Image.LANCZOS).save(ROOT / 'launcher' / 'preview-256.png')
