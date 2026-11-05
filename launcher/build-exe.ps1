@@ -2,6 +2,8 @@
 #   npm run app:build
 # Needs only what ships with Windows 10/11: .NET Framework 4.8 (csc.exe) and the WebView2 runtime.
 # The WebView2 SDK DLLs are fetched once from Microsoft's official NuGet package and signature-checked.
+#   -NoShortcuts   just build (used by package.ps1)
+param([switch]$NoShortcuts)
 $ErrorActionPreference = 'Stop'
 $Here = $PSScriptRoot
 $Bin = Join-Path $Here 'bin'
@@ -55,7 +57,7 @@ foreach ($dll in Get-ChildItem $Sdk -Filter *.dll) {
   if (-not (Test-Path $dest) -or (Get-Item $dest).Length -ne $dll.Length) { Copy-Item $dll.FullName $dest -Force }
 }
 $fw = Split-Path $csc
-& $csc /nologo /target:winexe /platform:x64 /optimize+ `
+& $csc /nologo /codepage:65001 /target:winexe /platform:x64 /optimize+ `
   "/out:$(Join-Path $Bin 'QSwissKnife.exe')" `
   "/win32icon:$(Join-Path $Here 'qswissknife.ico')" `
   "/reference:$(Join-Path $Bin 'Microsoft.Web.WebView2.Core.dll')" `
@@ -66,4 +68,4 @@ if ($LASTEXITCODE -ne 0) { throw 'Compiling QSwissKnife.exe failed.' }
 Write-Host "Built $(Join-Path $Bin 'QSwissKnife.exe')"
 
 # 3. Shortcuts now point at the exe
-& (Join-Path $Here 'install.ps1')
+if (-not $NoShortcuts) { & (Join-Path $Here 'install.ps1') }

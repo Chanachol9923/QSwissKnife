@@ -548,3 +548,13 @@ button, a, .chip, .seg button { touch-action: manipulation; }
 .task-status { width: 22px; display: grid; place-items: center; padding-top: 2px; flex-shrink: 0; }
 .task-group .file-row { background: var(--surface-2); }
 .stat .row b { font-size: 20px; }
+
+/* ---------- Desktop app download ---------- */
+.download-setup { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.download-setup.compact { align-items: stretch; }
+.sidebar-download { padding: 0 12px 10px; }
+.app-banner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; padding: 16px 18px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 12%, var(--surface)), var(--surface)); }
+.app-banner-text { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 2px; }
+.app-banner .download-setup { align-items: flex-end; }
+@media (max-width: 640px) { .app-banner .download-setup { align-items: stretch; width: 100%; } .app-banner .btn { width: 100%; } }

@@ -5,8 +5,11 @@ import { TimeInput, Timeline } from '../components/Timeline';
 import { usePersistent } from '../components/hooks';
 import { usePublishTasks, type TaskInfo } from '../components/tasks';
 import { clamp, cx, downloadBlob, formatBytes, formatTime, uid } from '../lib/utils';
+import { helperBase, isHosted } from '../lib/helper';
+import { DownloadSetup } from '../components/DownloadSetup';
 
-/* Talks to the local helper in server/ytHelper.ts (mounted by the Vite dev/preview server). */
+/* Talks to the local helper in server/ytHelper.ts — same origin in dev and the desktop app,
+   http://127.0.0.1:4317 when this page is hosted elsewhere (see lib/helper.ts). */
 
 type Format = 'mp4' | 'mov' | 'mp3' | 'gif';
 
@@ -43,7 +46,7 @@ interface Dl {
 }
 
 const api = async <T,>(path: string, init?: RequestInit): Promise<T> => {
-  const r = await fetch(`/api/yt${path}`, init);
+  const r = await fetch(`${helperBase}/api/yt${path}`, init);
   const ct = r.headers.get('content-type') ?? '';
   if (!ct.includes('json')) throw new Error('helper-missing');
   const body = await r.json();
@@ -123,11 +126,11 @@ export function YouTubeDownloader() {
           const j = await api<{ status: Dl['status']; progress: number | null; detail: string; bytes: number; name?: string; error?: string }>(`/jobs/${d.jobId}`);
           if (j.status === 'done') {
             patch(d.key, { status: 'fetching', detail: 'Transferring to browser…', progress: null, name: j.name });
-            const r = await fetch(`/api/yt/jobs/${d.jobId}/file`);
+            const r = await fetch(`${helperBase}/api/yt/jobs/${d.jobId}/file`);
             if (!r.ok) throw new Error('Could not fetch the finished file');
             const blob = await r.blob();
             patch(d.key, { status: 'done', blob, progress: 1, detail: 'Done' });
-            fetch(`/api/yt/jobs/${d.jobId}`, { method: 'DELETE' }).catch(() => {}); // free the helper's temp files
+            fetch(`${helperBase}/api/yt/jobs/${d.jobId}`, { method: 'DELETE' }).catch(() => {}); // free the helper's temp files
             if (autoSaveRef.current) downloadBlob(blob, j.name ?? 'download');
             toast(`Downloaded ${j.name}`);
           } else if (j.status === 'error') {
@@ -176,7 +179,7 @@ export function YouTubeDownloader() {
   };
 
   const cancel = (d: Dl) => {
-    if (d.jobId) fetch(`/api/yt/jobs/${d.jobId}`, { method: 'DELETE' }).catch(() => {});
+    if (d.jobId) fetch(`${helperBase}/api/yt/jobs/${d.jobId}`, { method: 'DELETE' }).catch(() => {});
     patch(d.key, { status: 'canceled', detail: 'Canceled', progress: null });
   };
 
@@ -217,10 +220,18 @@ export function YouTubeDownloader() {
           Browsers can’t download from YouTube directly, so this tool uses a small helper that runs on your computer with{' '}
           <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noreferrer">yt-dlp</a> and FFmpeg.
         </p>
-        {health === 'missing' ? (
+        {health === 'missing' && isHosted ? (
+          <>
+            <Alert kind="warn">
+              On the web version, YouTube downloads run through the QSwissKnife desktop app on your computer — the files never go through this website.
+              Install it (once), keep it open, then press <b>Check again</b>. If your browser asks to allow access to devices on your local network, choose <b>Allow</b>.
+            </Alert>
+            <DownloadSetup />
+          </>
+        ) : health === 'missing' ? (
           <Alert kind="warn">
-            The helper isn’t running. It starts automatically with <code className="mono">npm run dev</code> (or <code className="mono">npm run preview</code>) in the QSwissKnife folder —
-            a static build hosted elsewhere doesn’t include it.
+            The helper isn’t running. It starts automatically with <code className="mono">npm run dev</code> (or <code className="mono">npm run preview</code>) in the QSwissKnife folder,
+            and inside the QSwissKnife desktop app.
           </Alert>
         ) : (
           <>

@@ -4,3 +4,5 @@ launcher/server.log*
 launcher/bin/
 launcher/webview2-sdk/
 .claude/
+.build/
+release/

@@ -1,7 +1,7 @@
 {
   "name": "qswissknife",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File launcher/install.ps1",
     "icons": "python launcher/make-icons.py",
-    "app:build": "powershell -NoProfile -ExecutionPolicy Bypass -File launcher/build-exe.ps1"
+    "app:build": "powershell -NoProfile -ExecutionPolicy Bypass -File launcher/build-exe.ps1",
+    "package": "powershell -NoProfile -ExecutionPolicy Bypass -File launcher/package.ps1"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -31,5 +32,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.5"
-  }
+  },
+  "author": "AnnoyingDoggo",
+  "description": "QSwissKnife \u2014 convert, compress, crop and trim images, video, audio and PDFs on your own PC."
 }

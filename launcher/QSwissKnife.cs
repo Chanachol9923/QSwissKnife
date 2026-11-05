@@ -2,8 +2,14 @@
 // into Windows). Because the window belongs to this exe rather than to Edge, Windows gives it its own
 // taskbar button and icon, and pinning it works like any other program.
 //
+// Two layouts:
+//   installed  — node\node.exe, server\serve.mjs and app\ sit next to the exe (made by the setup);
+//                the exe starts the bundled server itself and stops it on exit.
+//   developer  — launcher\bin\QSwissKnife.exe inside the repo; start.ps1 builds and runs vite preview.
+//
 // Built by launcher/build-exe.ps1 (C# 5 / .NET Framework 4.8, no SDK needed).
 using System;
+using System.Reflection;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -15,11 +21,19 @@ using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
+[assembly: AssemblyTitle("QSwissKnife")]
+[assembly: AssemblyProduct("QSwissKnife")]
+[assembly: AssemblyCompany("AnnoyingDoggo")]
+[assembly: AssemblyCopyright("by AnnoyingDoggo")]
+[assembly: AssemblyVersion(QSwissKnife.Program.Version)]
+[assembly: AssemblyFileVersion(QSwissKnife.Program.Version)]
+
 namespace QSwissKnife
 {
     static class Program
     {
         public const string Url = "http://127.0.0.1:4317/";
+        public const string Version = "1.0.0.0";
 
         [DllImport("user32.dll")] static extern bool SetProcessDpiAwarenessContext(IntPtr value);
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
@@ -54,6 +68,12 @@ namespace QSwissKnife
             }
         }
 
+        public static string AppDir { get { return Path.GetDirectoryName(Application.ExecutablePath); } }
+        public static string NodeExe { get { return Path.Combine(AppDir, "node", "node.exe"); } }
+        public static string ServerScript { get { return Path.Combine(AppDir, "server", "serve.mjs"); } }
+        /// <summary>Running from an installed folder (bundled Node + server) rather than the repo.</summary>
+        public static bool Installed { get { return File.Exists(NodeExe) && File.Exists(ServerScript); } }
+
         /// <summary>launcher\bin\QSwissKnife.exe → project root</summary>
         public static string Root { get { return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "..", "..")); } }
         public static string Launcher { get { return Path.Combine(Root, "launcher"); } }
@@ -79,7 +99,7 @@ namespace QSwissKnife
             Text = "QSwissKnife";
             BackColor = Bg;
             StartPosition = FormStartPosition.Manual;
-            var ico = Path.Combine(Program.Launcher, "qswissknife.ico");
+            var ico = Path.Combine(Program.Installed ? Program.AppDir : Program.Launcher, "qswissknife.ico");
             Icon = File.Exists(ico) ? new Icon(ico) : Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             RestorePlacement();
             web.Dock = DockStyle.Fill;
@@ -87,6 +107,7 @@ namespace QSwissKnife
             Controls.Add(web);
             Load += async (s, e) => await StartAsync();
             FormClosing += (s, e) => SavePlacement();
+            FormClosed += (s, e) => StopOwnServer();
         }
 
         async Task StartAsync()
@@ -122,8 +143,8 @@ namespace QSwissKnife
 
             if (!ServerUp())
             {
-                core.NavigateToString(Splash("Starting QSwissKnife…", "Building and starting the local server. This takes a few seconds the first time.", false));
-                var error = await Task.Run(() => StartServer());
+                core.NavigateToString(Splash("Starting QSwissKnife…", Program.Installed ? "Starting the local engine…" : "Building and starting the local server. This takes a few seconds the first time.", false));
+                var error = await Task.Run(() => Program.Installed ? StartBundledServer() : StartServer());
                 if (error != null)
                 {
                     core.NavigateToString(Splash("QSwissKnife couldn't start", error, true));
@@ -148,6 +169,37 @@ namespace QSwissKnife
                 using (var res = (HttpWebResponse)req.GetResponse()) return res.StatusCode == HttpStatusCode.OK;
             }
             catch { return false; }
+        }
+
+        static Process ownServer;
+
+        /// <summary>Installed layout: run the bundled Node server as a child that exits with us.</summary>
+        static string StartBundledServer()
+        {
+            var psi = new ProcessStartInfo(Program.NodeExe,
+                "\"" + Program.ServerScript + "\" --port 4317 --root \"" + Path.Combine(Program.AppDir, "app") + "\" --parent-pid " + Process.GetCurrentProcess().Id)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Program.AppDir,
+            };
+            // Pick up yt-dlp / FFmpeg installed after this process started (e.g. by the setup).
+            psi.EnvironmentVariables["PATH"] = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine) + ";" +
+                                                Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
+            try { ownServer = Process.Start(psi); }
+            catch (Exception ex) { return "Couldn't start the bundled Node.js:\n" + ex.Message; }
+            for (var i = 0; i < 100; i++)
+            {
+                if (ServerUp()) return null;
+                if (ownServer.HasExited) return "The local engine stopped right away (exit code " + ownServer.ExitCode + "). Is port 4317 used by another program?";
+                Thread.Sleep(150);
+            }
+            return "The local engine didn't respond on port 4317.";
+        }
+
+        static void StopOwnServer()
+        {
+            try { if (ownServer != null && !ownServer.HasExited) ownServer.Kill(); } catch { /* already gone */ }
         }
 
         /// <summary>Runs start.ps1 -ServerOnly (build if needed + start hidden server). Returns an error message or null.</summary>

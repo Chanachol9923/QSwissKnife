@@ -343,9 +343,53 @@ async function dispose(job: Job) {
   setTimeout(() => rm(job.dir, { recursive: true, force: true }).catch(() => {}), 1500);
 }
 
+/* ---------- who may call the helper ---------- */
+
+// Pages on this computer, the hosted web app on Vercel (production + preview URLs), and anything listed
+// in QSK_ALLOWED_ORIGINS (comma-separated, e.g. a custom domain). Every other website is refused —
+// without this, any page you visit could start downloads on your machine.
+const HOSTED_ORIGIN = /^https:\/\/qswissknife(-[a-z0-9-]+)?\.vercel\.app$/i;
+const EXTRA_ORIGINS = (process.env.QSK_ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim().replace(/\/$/, '')).filter(Boolean);
+
+function originAllowed(origin: string): boolean {
+  if (EXTRA_ORIGINS.includes(origin) || HOSTED_ORIGIN.test(origin)) return true;
+  try {
+    const u = new URL(origin);
+    return u.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** CORS + Private Network Access. Returns false if the request was refused/answered here. */
+function crossOrigin(req: IncomingMessage, res: ServerResponse): boolean {
+  const origin = req.headers.origin;
+  if (origin) {
+    if (!originAllowed(origin)) {
+      send(res, 403, { error: `QSwissKnife helper: requests from ${origin} aren't allowed` });
+      return false;
+    }
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+  }
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // lets an https:// site reach this http://127.0.0.1 helper (Chrome/Edge Private Network Access)
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
+    res.setHeader('Access-Control-Max-Age', '600');
+    res.statusCode = 204;
+    res.end();
+    return false;
+  }
+  return true;
+}
+
 /* ---------- router ---------- */
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
+  if (!crossOrigin(req, res)) return;
   const url = new URL(req.url ?? '/', 'http://local');
   const path = url.pathname.replace(/^\/api\/yt/, '');
   try {
@@ -377,18 +421,26 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-export function ytHelper(): Plugin {
-  const sweep = () => {
+/** Request handler for /api/yt/* — shared by the Vite plugin and the standalone server (serve.ts). */
+export const handleYt = (req: IncomingMessage, res: ServerResponse) => void handle(req, res);
+
+/** Expire old jobs periodically; returns a function that stops the timer and cleans everything up. */
+export function startYtHousekeeping(): () => void {
+  const timer = setInterval(() => {
     for (const j of jobs.values()) if (Date.now() - j.created > JOB_TTL_MS) dispose(j);
+  }, 10 * 60_000);
+  timer.unref?.();
+  return () => {
+    clearInterval(timer);
+    for (const j of jobs.values()) dispose(j);
   };
+}
+
+export function ytHelper(): Plugin {
   const mount = (server: { middlewares: { use: (path: string, fn: (req: IncomingMessage, res: ServerResponse) => void) => void }; httpServer?: { on: (ev: string, fn: () => void) => void } | null }) => {
-    server.middlewares.use('/api/yt', (req, res) => void handle(req, res));
-    const timer = setInterval(sweep, 10 * 60_000);
-    timer.unref?.();
-    server.httpServer?.on('close', () => {
-      clearInterval(timer);
-      for (const j of jobs.values()) dispose(j);
-    });
+    server.middlewares.use('/api/yt', handleYt);
+    const stop = startYtHousekeeping();
+    server.httpServer?.on('close', stop);
   };
   return {
     name: 'qswissknife-yt-helper',

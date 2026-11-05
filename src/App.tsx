@@ -5,6 +5,7 @@ import { Palette } from './components/Palette';
 import { Home } from './components/Home';
 import { TabBar, type TabState } from './components/TabBar';
 import { TasksPage } from './components/TasksPage';
+import { DownloadSetup } from './components/DownloadSetup';
 import { ToolScopeContext, summarize, useTaskSources, type TaskInfo } from './components/tasks';
 import { usePersistent } from './components/hooks';
 import { useToast } from './components/ui';
@@ -166,7 +167,7 @@ export default function App() {
             </span>
             <span>
               QSwissKnife
-              <small>{TOOLS.length} tools · offline-first</small>
+              <small>by AnnoyingDoggo · {TOOLS.length} tools</small>
             </span>
           </a>
         </div>
@@ -205,6 +206,7 @@ export default function App() {
             </div>
           ))}
         </nav>
+        <DownloadSetup compact className="sidebar-download" />
         <div className="sidebar-foot">
           <ShieldCheck size={14} />
           Files never leave your device

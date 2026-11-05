@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { Search, Star, X } from 'lucide-react';
 import { CATEGORIES, TOOLS, categoryById, searchTools, toolById, type CategoryId, type Tool } from '../tools/registry';
 import { cx } from '../lib/utils';
+import { inDesktopApp } from '../lib/helper';
+import { DownloadSetup } from './DownloadSetup';
 
 interface Props {
   favs: string[];
@@ -56,6 +58,16 @@ export function Home({ favs, recent, onToggleFav }: Props) {
           ))}
         </div>
       </section>
+
+      {!inDesktopApp && (
+        <div className="card app-banner">
+          <div className="app-banner-text">
+            <b>QSwissKnife for Windows</b>
+            <span className="muted">Its own window and taskbar icon, works offline, and adds the YouTube Downloader.</span>
+          </div>
+          <DownloadSetup />
+        </div>
+      )}
 
       {browsing ? (
         <>
