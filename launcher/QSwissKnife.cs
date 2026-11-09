@@ -33,7 +33,7 @@ namespace QSwissKnife
     static class Program
     {
         public const string Url = "http://127.0.0.1:4317/";
-        public const string Version = "1.0.0.0";
+        public const string Version = "1.1.0.0";
 
         [DllImport("user32.dll")] static extern bool SetProcessDpiAwarenessContext(IntPtr value);
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();

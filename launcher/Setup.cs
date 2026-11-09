@@ -31,8 +31,8 @@ namespace QSwissKnifeSetup
 {
     static class Info
     {
-        public const string Version = "1.0.0.0";
-        public const string DisplayVersion = "1.0.0";
+        public const string Version = "1.1.0.0";
+        public const string DisplayVersion = "1.1.0";
         public const string Name = "QSwissKnife";
         public const string Publisher = "AnnoyingDoggo";
         public const string Repo = "https://github.com/Chanachol9923/QSwissKnife";
