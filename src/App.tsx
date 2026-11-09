@@ -1,5 +1,5 @@
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ChevronRight, Home as HomeIcon, ListChecks, Loader2, Menu, Moon, Search, ShieldCheck, Star, Sun } from 'lucide-react';
+import { UploadCloud, ChevronRight, Home as HomeIcon, ListChecks, Loader2, Menu, Moon, Search, ShieldCheck, Star, Sun } from 'lucide-react';
 import { CATEGORIES, TOOLS, categoryById, toolById, type Tool } from './tools/registry';
 import { Palette } from './components/Palette';
 import { Home } from './components/Home';
@@ -10,6 +10,7 @@ import { ToolScopeContext, summarize, useTaskSources, type TaskInfo } from './co
 import { usePersistent } from './components/hooks';
 import { useToast } from './components/ui';
 import { cx } from './lib/utils';
+import { sendToConverter } from './lib/convert/inbox';
 
 /** scroll position per route, so switching tabs returns you to where you were */
 const scrollMemory = new Map<string, number>();
@@ -135,6 +136,56 @@ export default function App() {
     window.addEventListener('beforeunload', onUnload);
     return () => window.removeEventListener('beforeunload', onUnload);
   }, []);
+
+  // Drag files anywhere: on Home / Running tasks they open in Convert Anything. Elsewhere a drop
+  // that misses a drop zone is swallowed — otherwise the browser would navigate to the file and
+  // throw away every open tab.
+  const [dragging, setDragging] = useState(false);
+  const keyRef = useRef(activeKey);
+  keyRef.current = activeKey;
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (e: DragEvent) => !!e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
+    const routable = () => keyRef.current === '' || keyRef.current === 'tasks';
+    const enter = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      depth++;
+      if (routable()) setDragging(true);
+    };
+    const leave = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      depth = Math.max(0, depth - 1);
+      if (!depth) setDragging(false);
+    };
+    const over = (e: DragEvent) => {
+      if (hasFiles(e)) e.preventDefault();
+    };
+    const drop = (e: DragEvent) => {
+      depth = 0;
+      setDragging(false);
+      if (!hasFiles(e)) return;
+      if (e.defaultPrevented) return; // a FileDrop already took it
+      e.preventDefault();
+      const files = Array.from(e.dataTransfer?.files ?? []);
+      if (!files.length) return;
+      if (routable()) {
+        sendToConverter(files);
+        go('convert');
+      } else {
+        toast('Drop files onto the drop area of this tool', 'info', { label: 'Convert instead', onClick: () => (sendToConverter(files), go('convert')) });
+      }
+    };
+    window.addEventListener('dragenter', enter);
+    window.addEventListener('dragleave', leave);
+    window.addEventListener('dragover', over);
+    window.addEventListener('drop', drop);
+    return () => {
+      window.removeEventListener('dragenter', enter);
+      window.removeEventListener('dragleave', leave);
+      window.removeEventListener('dragover', over);
+      window.removeEventListener('drop', drop);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const closeTab = (id: string) => {
     const sum = summarize(tabState[id]?.tasks ?? []);
@@ -274,6 +325,17 @@ export default function App() {
         </main>
       </div>
 
+      {dragging && (
+        <div className="drop-overlay" aria-hidden>
+          <div>
+            <span className="drop-icon">
+              <UploadCloud size={30} />
+            </span>
+            <b>Drop to convert</b>
+            <span className="muted">QSwissKnife detects each file’s type and suggests what it can become</span>
+          </div>
+        </div>
+      )}
       {paletteOpen && <Palette onClose={() => setPaletteOpen(false)} recent={recent} />}
     </div>
   );

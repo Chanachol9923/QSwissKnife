@@ -1,13 +1,14 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import {
-  AudioLines, AudioWaveform, Binary, Braces, Clapperboard, Clock, CloudDownload, Combine, Crop, FileImage, FileStack, Film, Fingerprint,
+  ArrowRightLeft, AudioLines, AudioWaveform, Binary, Braces, Clapperboard, Clock, CloudDownload, Combine, Crop, FileImage, FileStack, Film, Fingerprint,
   Hash, ImageDown, ImagePlus, KeyRound, Link2, Music, Palette, QrCode, Repeat, Ruler, Scaling, Scissors,
   Sheet, SquareDashed, Type, Video, Wand2, FileText, type LucideIcon,
 } from 'lucide-react';
 
-export type CategoryId = 'image' | 'video' | 'audio' | 'pdf' | 'dev' | 'text';
+export type CategoryId = 'convert' | 'image' | 'video' | 'audio' | 'pdf' | 'dev' | 'text';
 
 export const CATEGORIES: { id: CategoryId; name: string; color: string }[] = [
+  { id: 'convert', name: 'Convert', color: 'var(--accent)' },
   { id: 'image', name: 'Image', color: 'var(--c-image)' },
   { id: 'video', name: 'Video', color: 'var(--c-video)' },
   { id: 'audio', name: 'Audio', color: 'var(--c-audio)' },
@@ -36,8 +37,11 @@ const pdf = () => import('./pdf');
 const dev = () => import('./dev');
 const text = () => import('./text');
 const youtube = () => import('./youtube');
+const converter = () => import('./converter');
 
 export const TOOLS: Tool[] = [
+  // Convert
+  { id: 'convert', name: 'Convert Anything', desc: 'Drop any file — its type is detected automatically. 80+ formats: images, video, audio, PDF, Word, Excel, data, subtitles, fonts, archives.', category: 'convert', icon: ArrowRightLeft, keywords: 'convert converter any file format detect universal heic docx pdf xlsx csv json yaml mp4 mp3 srt ttf woff zip', component: from(converter, 'Converter') },
   // Image
   { id: 'image-compress', name: 'Compress Image', desc: 'Shrink JPG, PNG & WebP with a live before/after preview.', category: 'image', icon: ImageDown, keywords: 'reduce size optimize smaller jpg png webp batch', component: from(image, 'ImageCompress') },
   { id: 'image-convert', name: 'Convert Image', desc: 'Batch convert between JPG, PNG, WebP and AVIF.', category: 'image', icon: Repeat, keywords: 'format jpg png webp avif heic transform', component: from(image, 'ImageConvert') },

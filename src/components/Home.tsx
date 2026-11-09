@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, Star, X } from 'lucide-react';
+import { Search, Star, UploadCloud, X } from 'lucide-react';
 import { CATEGORIES, TOOLS, categoryById, searchTools, toolById, type CategoryId, type Tool } from '../tools/registry';
 import { cx } from '../lib/utils';
 import { inDesktopApp } from '../lib/helper';
@@ -58,6 +58,16 @@ export function Home({ favs, recent, onToggleFav }: Props) {
           ))}
         </div>
       </section>
+
+      <a className="card drop-hint" href="#/convert">
+        <span className="drop-icon">
+          <UploadCloud size={22} />
+        </span>
+        <span style={{ minWidth: 0 }}>
+          <b>Drop any file anywhere on this page to convert it</b>
+          <span className="muted">The type is detected automatically — images, video, audio, PDF, Word, Excel, data, subtitles, fonts and archives.</span>
+        </span>
+      </a>
 
       {!inDesktopApp && (
         <div className="card app-banner">
